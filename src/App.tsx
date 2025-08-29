@@ -1,5 +1,5 @@
 import './App.css';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 type todo_item = {
   id: string;
@@ -10,6 +10,11 @@ type todo_item = {
 function App() {
   const [tasks, setTasks] = useState<todo_item[]>([]);
   const [title, setTitle] = useState('');
+  const completed = () => tasks.filter((x) => x.completed);
+
+  const clearCompleted = useCallback(() => {
+    setTasks((prev) => prev.filter((x) => !x.completed));
+  }, []);
 
   const toggleTask = useCallback((id: string) => {
     setTasks((prev) => {
@@ -42,22 +47,34 @@ function App() {
   }, [title]);
   return (
     <>
-      <div>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} />
-        <button onClick={addTask}>Add Task</button>
+      <div className="main">
+        <div className="header">
+          <input
+            className="input"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <button onClick={addTask}>Add Task</button>
+          <button onClick={clearCompleted} disabled={completed().length === 0}>
+            Clear completed
+          </button>
+        </div>
+        <ul className="list">
+          {tasks.map((task) => (
+            <li className="item" key={task.id}>
+              <label className="label">
+                <input
+                  className="checkbox"
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => toggleTask(task.id)}
+                />
+                <span className="text">{task.title}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
       </div>
-      {tasks.map((task) => (
-        <li key={task.id}>
-          <label>
-            <input
-              type="checkbox"
-              checked={task.completed}
-              onChange={() => toggleTask(task.id)}
-            />{' '}
-            {task.title}
-          </label>
-        </li>
-      ))}
     </>
   );
 }
