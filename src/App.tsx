@@ -15,8 +15,10 @@ function App() {
   const [filter, setFilter] = useState<Filter>('all');
 
   const filteredTasks = useMemo(() => {
-    if (filter === 'active') return tasks.filter((task) => !task.completed);
-    if (filter === 'completed') return tasks.filter((task) => task.completed);
+    if (filter === 'active')
+      return tasks.filter((task) => task.completed === false);
+    if (filter === 'completed')
+      return tasks.filter((task) => task.completed === true);
     return tasks;
   }, [tasks, filter]);
 
@@ -55,6 +57,7 @@ function App() {
       return prev_tasks;
     });
     setTitle('');
+    setFilter('all');
   }, [title]);
   return (
     <>
@@ -62,6 +65,7 @@ function App() {
         <h1 className="title">todos</h1>
         <div className="header">
           <input
+            data-testid="title-input"
             className="input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
