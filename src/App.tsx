@@ -1,5 +1,5 @@
 import './App.css';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 type todo_item = {
   id: string;
@@ -7,9 +7,19 @@ type todo_item = {
   completed: boolean;
 };
 
+type Filter = 'all' | 'active' | 'completed';
+
 function App() {
   const [tasks, setTasks] = useState<todo_item[]>([]);
   const [title, setTitle] = useState('');
+  const [filter, setFilter] = useState<Filter>('all');
+
+  const filteredTasks = useMemo(() => {
+    if (filter === 'active') return tasks.filter((task) => !task.completed);
+    if (filter === 'completed') return tasks.filter((task) => task.completed);
+    return tasks;
+  }, [tasks, filter]);
+
   const completed = () => tasks.filter((x) => x.completed);
 
   const clearCompleted = useCallback(() => {
@@ -33,12 +43,13 @@ function App() {
   }, []);
 
   const addTask = useCallback(() => {
-    if (!title) return;
+    const t = title.trim();
+    if (!t) return;
     setTasks((prev) => {
       const prev_tasks = [...prev];
       prev_tasks.push({
         id: Date.now().toString(),
-        title: title,
+        title: t,
         completed: false,
       });
       return prev_tasks;
@@ -48,6 +59,7 @@ function App() {
   return (
     <>
       <div className="main">
+        <h1 className="title">todos</h1>
         <div className="header">
           <input
             className="input"
@@ -60,7 +72,7 @@ function App() {
           </button>
         </div>
         <ul className="list">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <li className="item" key={task.id}>
               <label className="label">
                 <input
@@ -74,6 +86,26 @@ function App() {
             </li>
           ))}
         </ul>
+        <div className="filters">
+          <button
+            className={` ${filter === 'all' ? 'is-active' : ''}`}
+            onClick={() => setFilter('all')}
+          >
+            All
+          </button>
+          <button
+            className={`${filter === 'active' ? 'is-active' : ''}`}
+            onClick={() => setFilter('active')}
+          >
+            Active
+          </button>
+          <button
+            className={`${filter === 'completed' ? 'is-active' : ''}`}
+            onClick={() => setFilter('completed')}
+          >
+            Completed
+          </button>
+        </div>
       </div>
     </>
   );
